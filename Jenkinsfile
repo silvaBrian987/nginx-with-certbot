@@ -3,20 +3,19 @@ pipeline {
     stages {
         stage('Building') {
             environment { 
-                DOCKER_REGISTRY = 'smg-devtools-docker.swm.com.ar:8483'
-                DOCKER_REGISTRY_CREDENTIALS = 'smg-devtools-docker-credentials'
-                IMAGE_NAME = "smg/gunicorn-template"
-                // BASE_IMAGE = 'rhscl/python-36-rhel7:1-36'
-                IMAGE_VERSION = "${currentBuild.startTimeInMillis}"
-            }
+                    DOCKER_REGISTRY = 'hub.docker.com'
+                    DOCKER_REGISTRY_CREDENTIALS = 'docker-credentials'
+                    IMAGE_NAME = "marine789/nginx-with-certbot"
+                    IMAGE_VERSION = "${currentBuild.startTimeInMillis}"
+                }
             steps {
-                echo 'Inicia build de la imagen con Docker'
-                sh 'docker build --file Dockerfile.rhel --tag $IMAGE_NAME:latest .'
+                echo 'Inicia build de imagen con Docker'
+                sh 'docker build --file Dockerfile --tag $IMAGE_NAME:latest .'
                 echo 'Se tagea la imagen con el nro de build'
                 sh 'docker tag $IMAGE_NAME:latest $IMAGE_NAME:$IMAGE_VERSION'
                 sh 'docker tag $IMAGE_NAME:latest $DOCKER_REGISTRY/$IMAGE_NAME:$IMAGE_VERSION'
                 sh 'docker tag $IMAGE_NAME:latest $DOCKER_REGISTRY/$IMAGE_NAME:latest'
-                echo 'Se sube la imagen al repositorio Nexus'
+                echo 'Se sube la imagen al repositorio'
                 script {
                     docker.withRegistry("https://$DOCKER_REGISTRY/", "$DOCKER_REGISTRY_CREDENTIALS") {
                         sh 'docker push $DOCKER_REGISTRY/$IMAGE_NAME:latest'
